@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hfsoft.hfcms.sysmanager.mapper.SysAccountMapper">
+<!--    <select id="login" resultType="SysAccount">
+        select * from sys_account where account_name=#{accountName} and cipher=#{cipher};
+    </select>-->
+    <select id="name" resultType="SysAccount">
+        select * from sys_account where account_name=#{accountName};
+    </select>
+    <select id="pas" resultType="SysAccount">
+        select * from sys_account where cipher=#{cipher};
+    </select>
+</mapper>

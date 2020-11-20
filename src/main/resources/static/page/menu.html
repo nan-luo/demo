@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+
+
+                        <div class="layui-inline">
+                            <label class="layui-form-label">菜单名称</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="name" name="name" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加 </button>
+<!--                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除 </button>-->
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+
+<script type="text/html" id="available">
+    {{d.available==1 ? '是': '否'}}
+</script>
+<script type="text/html" id="parentId">
+    {{d.parentId==7 ? '系统管理':''}}
+    {{d.parentId==8 ? '财务管理':''}}
+    {{d.parentId==12 ? '菜单管理':''}}
+    {{d.parentId==13 ? '组织管理':''}}
+    {{d.parentId==16 ? '用户管理':''}}
+    {{d.parentId==17 ? '角色管理':''}}
+    {{d.parentId==80 ? '000000':''}}
+    {{d.parentId==81 ? '1111111':''}}
+</script>
+
+<script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table'], function () {
+
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+
+        table.render({
+            elem: '#currentTableId',
+            url: '../sysMenu',
+            toolbar: '#toolbarDemo',
+/*            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],*/
+			request: {
+				pageName:'current' //默认为page
+				,limitName:'size'  //默认为limit
+
+				},
+			parseData: function (res) {
+
+				console.log('返回的值', res);
+                console.log('datalist', res.data.records);
+                localStorage.setItem("menu",JSON.stringify(res));
+
+				return {
+					"code": res.code, //code为0表格才能读到数据
+					"data": res.data.records, //解析数据列表
+					"msg": res.message, //解析提示文本
+					"count": res.data.total, //解析数据长度，一定要写这句，否则分页点不了
+				};
+			},
+            cols: [
+                [
+ /*                   {type: 'checkbox', fixed: 'left'},*/
+                    {field:'id', title:'ID', width:100, fixed: 'left',  }
+                    ,{field:'menuName', title:'菜单名称', width:100}
+                    ,{field:'menuType', title:'菜单类型', width:100}
+                    ,{field:'url', title:'路径', width:100, }
+                    ,{field:'icon', title:'图标', width:100,}
+                    ,{field:'perms', title:'权限串', width:100}
+                    ,{field:'parentId', title:'上级编号', width:100,templet:'#parentId'}
+                    ,{field:'available', title:'是否可用', width:100,templet:"#available"}
+                    ,{field:'orderNum', title:'排序号', width:100}
+                    ,{field:'createTime', title:'创建时间', width:100}
+                    ,{field:'createUser', title:'创建人', width:100}
+                    ,{field:'updateTime', title:'修改时间', width:100}
+                    ,{field:'updateUser', title:'修改人', width:100}
+                    ,{title: '操作', minWidth: 100, templet: '#currentTableBar', fixed: "right", align: "center"}
+                ]
+            ],
+
+            page: true,
+            skin: 'line',
+			//toolbar: 'default'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var name=document.getElementById("name").value;
+                console.log(data);
+            var result = JSON.stringify(data.field);
+            table.render({
+                elem: '#currentTableId',
+                url: '/./sysMenu/findUserByFuzzyUserName',
+                page:true,
+                toolbar:'default',
+                where:{
+                    "name":name
+                },
+                request: {
+                    pageName: 'current',
+                    limitName:'size',
+                },
+                parseData:function (res) {
+                    console.log('返回的值', res);
+                    console.log('datalist', res.data.records);
+                    return {
+                        "code": res.code, //code为0表格才能读到数据
+                        "data": res.data.records, //解析数据列表
+                        "msg": res.message, //解析提示文本
+                        "count": res.data.total, //解析数据长度，一定要写这句，否则分页点不了
+                    };
+                },
+                cols: [
+                [
+                    //{type: 'checkbox', fixed: 'left'}
+                    {field:'id', title:'ID', width:100, fixed: 'left',  }
+                    ,{field:'menuName', title:'菜单名称', width:100}
+                    ,{field:'menuType', title:'菜单类型', width:100}
+                    ,{field:'url', title:'路径', width:100, }
+                    ,{field:'icon', title:'图标', width:100,}
+                    ,{field:'perms', title:'权限串', width:100}
+                    ,{field:'parentId', title:'上级编号', width:100,templet:'#parentId'}
+                    ,{field:'available', title:'是否可用', width:100,templet:"#available"}
+                    ,{field:'orderNum', title:'排序号', width:100}
+                    ,{field:'createTime', title:'创建时间', width:100}
+                    ,{field:'createUser', title:'创建人', width:100}
+                    ,{field:'updateTime', title:'修改时间', width:100}
+                    ,{field:'updateUser', title:'修改人', width:100}
+                    ,{title: '操作', minWidth: 100, templet: '#currentTableBar', fixed: "right", align: "center"}
+                ]
+            ]
+
+            });
+/*            layer.alert(result, {
+                title: '最终的搜索信息'
+            });
+            //执行搜索重载
+            table.reload('currentTableId', {
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    searchParams: result
+                }
+            }, 'data');*/
+
+            return false;
+        });
+
+        /**
+         * toolbar监听事件
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {  // 监听添加操作
+                var index = layer.open({
+                    title: '添加用户',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: '../page/table/add.html',
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else if (obj.event === 'delete') {  // 监听删除操作
+                var checkStatus = menu.checkStatus('currentTableId')
+                    , data = checkStatus.data;
+                layer.alert(JSON.stringify(data));
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+
+/*            var checkStatus=table.checkStatus(obj.config.id)
+            ,data=checkStatus.data;
+            console.log(checkStatus);*/
+
+            if (obj.event === 'edit') {
+                console.log(obj);
+                localStorage.setItem("edit",JSON.stringify(obj));
+                var index = layer.open({
+                    title: '编辑用户',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: '../page/table/edit.html',
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    console.log(index);
+                    console.log(obj);
+                    console.log("data[0].id为",data.id)
+                    var url="/./sysMenu/delete?idList="+data.id;
+                    $.ajax({
+                       type:'post',
+                       url:url,
+                       contentType: 'application/json',
+                       dataType:'json',
+                        success:function (resp) {
+                           console.log(resp);
+                           if (resp.code==0){
+                               layer.msg("删除成功",{icon:6})
+                               obj.del();
+                           }else {
+                               layer.msg("删除失败",{icon:5})
+                           }
+                        }
+                    });
+                    //obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>

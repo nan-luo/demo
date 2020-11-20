@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <form class="layui-form layui-from-pane" lay-filter="aaa" action="" style="margin-top:20px">
+
+
+
+        <div class="layui-form-item" hidden="true">
+            <label class="layui-form-label">id</label>
+            <div class="layui-input-block">
+                <input type="text" name="id" placeholder="请输入ID" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="roleName" required lay-verify="required" placeholder="请输入角色名称" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色描述</label>
+            <div class="layui-input-block">
+                <input type="text" name="description"  placeholder="请输入角色描述" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否可用</label>
+            <div class="layui-input-block">
+                <select type="text" name="available" lay-verify="">
+                    <option value="">请选择</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">创建时间</label>
+            <div class="layui-input-block">
+                <input id="test2" type="text" name="createTime"  placeholder="请选择创建时间" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">创建用户</label>
+            <div class="layui-input-block">
+                <input type="text" name="createUser"  placeholder="请输入创建人" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改时间</label>
+            <div class="layui-input-block">
+                <input  id="test1" type="text" name="updateTime"  placeholder="请选择修改时间" autocomplete="off"
+                        class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改者</label>
+            <div class="layui-input-block">
+                <input type="text" name="updateUser"  placeholder="请输入修改者" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认修改</button>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+<script type="text/jscript" src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery;
+
+        let  roleEdit1=localStorage.getItem("role-edit");
+       // let   user=localStorage.getItem("edit");
+        let    roleEdit=JSON.parse(roleEdit1);
+        console.log("-->");
+        console.log(roleEdit);
+
+
+        form.val("aaa", {
+            "id": roleEdit.data.id
+            ,"roleName":roleEdit.data.roleName
+            , "description": roleEdit.data.description
+            , "available": roleEdit.data.available
+            , "createTime": roleEdit.data.createTime
+            , "createUser": roleEdit.data.createUser
+            , "updateTime": roleEdit.data.updateTime
+            , "updateUser": roleEdit.data.updateUser
+
+        });
+
+
+        //监听提交  data为全局的内容
+        form.on('submit(saveBtn)', function (data) {
+
+            console.log(data);
+            console.log(data.field);
+            $.ajax({
+                type:'post',
+                url: '/././sysRole/update',
+                data:JSON.stringify(data.field),
+                contentType: 'application/json',
+                dataType:'json',
+                success:function (resp) {
+                    console.log(resp);
+                    layer.closeAll();
+                    if (resp.code == 0){
+                        layer.msg("修改成功",{icon: 6});
+                        parent.location.reload();
+                        var iframeIndex = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(iframeIndex);
+                    }else {
+                        layer.msg("修改失败",{icon: 5})
+                    }
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>

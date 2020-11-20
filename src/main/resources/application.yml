@@ -1,0 +1,32 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: utf-8
+
+spring:
+
+
+  profiles:
+    active: dev
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/static/
+    suffix: .html
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  aop:
+    proxy-target-class: true
+
+mybatis-plus:
+  type-aliases-package: com.hfsoft.*.*.domain
+  mapper-locations: classpath*:/mapper/*/**Mapper.xml
+  configuration:
+    jdbc-type-for-null: null
+  global-config:
+    banner: false
+    db-config:
+      select-strategy: not_empty
